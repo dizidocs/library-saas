@@ -1,57 +1,38 @@
-// ===============================
-// 👨‍🎓 Student Routes
-// ===============================
 import express from "express";
+import Student from "../models/Student.js";
+import Payment from "../models/Payment.js";
 const router = express.Router();
 
-// In future, you'll import your MongoDB Student model
-// import Student from "../models/Student.js";
-
-// Temporary static data (to test frontend)
-const mockStudentData = {
-  Oaqt8gzylLSOgu9K52q7xNTLpKO2: {
-    uid: "Oaqt8gzylLSOgu9K52q7xNTLpKO2",
-    name: "Ravi Sharma",
-    seatNo: 12,
-    roomType: "AC",
-    subscription: "Monthly",
-    nextDueDate: "2025-12-01",
-    payments: [
-      { date: "2025-10-01", amount: 1000, mode: "Cash" },
-      { date: "2025-11-01", amount: 1000, mode: "UPI" },
-    ],
-  },
-  YuKFOHXzuyWvaS8gYwZDdjU9ZuC2: {
-    uid: "YuKFOHXzuyWvaS8gYwZDdjU9ZuC2",
-    name: "Amit Verma",
-    seatNo: 5,
-    roomType: "Non-AC",
-    subscription: "Half-Month",
-    nextDueDate: "2025-11-20",
-    payments: [
-      { date: "2025-10-15", amount: 600, mode: "Cash" },
-      { date: "2025-11-05", amount: 600, mode: "UPI" },
-    ],
-  },
-};
-
-// ===============================
-// GET /api/student/:uid
-// ===============================
+// ✅ GET student by Firebase UID
 router.get("/:uid", async (req, res) => {
   try {
-    const uid = req.params.uid;
+    const { uid } = req.params;
 
-    // Simulate DB lookup (replace with Mongo query later)
-    const student = mockStudentData[uid];
+    // Find student by Firebase UID
+    const student = await Student.findOne({ firebaseUid: uid }).populate("libraryId");
 
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    res.status(200).json(student);
-  } catch (error) {
-    console.error("❌ Error fetching student data:", error);
+    // Fetch payment history for that student
+    const payments = await Payment.find({ studentId: student._id }).sort({ date: -1 });
+
+    // Combine data
+    const data = {
+      uid: student.firebaseUid,
+      name: student.name,
+      seatNo: student.seatNo,
+      roomType: student.roomType,
+      subscription: student.subscription,
+      nextDueDate: student.nextDueDate,
+      library: student.libraryId ? student.libraryId.name : null,
+      payments,
+    };
+
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("❌ Mongo fetch error:", err);
     res.status(500).json({ error: "Server error fetching student details" });
   }
 });
