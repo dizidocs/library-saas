@@ -1,52 +1,76 @@
+// ===============================
+// ✅ Library SaaS Backend Server
+// ===============================
+
 import express from "express";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 import cors from "cors";
+
+// Import all routes
+import userRoutes from "./routes/userRoutes.js";
 import ownerRoutes from "./routes/ownerRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 
-// Load environment variables
+// ===============================
+// 🔧 Configurations
+// ===============================
 dotenv.config();
-
-const app = express(); // ✅ Define app before using it
-
-
-app.use("/api/owner", ownerRoutes);
-app.use("/api/student", studentRoutes);
-app.use("/api/payment", paymentRoutes);
-
-// Middleware
+const app = express();
 app.use(express.json());
 
-// ✅ Enable CORS for frontend + localhost
+// ===============================
+// 🌐 Enable CORS for Frontend Access
+// ===============================
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",
-      "https://librarysaas-46bde.web.app"
+      "http://localhost:3000",               // local frontend
+      "https://librarysaas-46bde.web.app",   // live Firebase hosting
     ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
 
-// Import routes
-import userRoutes from "./routes/userRoutes.js";
-
-// ✅ Mount routes AFTER app is defined
-app.use("/api/users", userRoutes);
-
-// Default route (optional)
-app.get("/", (req, res) => {
-  res.send("Library SaaS Backend Running 🚀");
+// Fallback header in case Render strips CORS
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
 });
 
-// MongoDB Connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+// ===============================
+// 🚏 API Routes
+// ===============================
+app.get("/", (req, res) => {
+  res.send("📚 Library SaaS Backend is Running Successfully 🚀");
+});
 
-// Start server
+app.use("/api/users", userRoutes);
+app.use("/api/owner", ownerRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/payment", paymentRoutes);
+
+// ===============================
+// ⚙️ MongoDB Connection
+// ===============================
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+
+// ===============================
+// 🚀 Start the Server
+// ===============================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
