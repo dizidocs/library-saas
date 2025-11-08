@@ -2,11 +2,19 @@ import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
+import ownerRoutes from "./routes/ownerRoutes.js";
+import studentRoutes from "./routes/studentRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 // Load environment variables
 dotenv.config();
 
 const app = express(); // ✅ Define app before using it
+
+
+app.use("/api/owner", ownerRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // Middleware
 app.use(express.json());
