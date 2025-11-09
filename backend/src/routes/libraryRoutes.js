@@ -36,4 +36,30 @@ router.get("/", async (req, res) => {
   }
 });
 
+// ✅ Admin: Get pending libraries
+router.get("/pending", async (req, res) => {
+  try {
+    const pendingLibs = await Library.find({ status: "pending" });
+    res.status(200).json(pendingLibs);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch pending libraries" });
+  }
+});
+
+// ✅ Admin: Approve or Reject Library
+router.put("/:id/status", async (req, res) => {
+  try {
+    const { status } = req.body; // "approved" or "rejected"
+    const updated = await Library.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    res.status(200).json(updated);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update status" });
+  }
+});
+
+
 export default router;
