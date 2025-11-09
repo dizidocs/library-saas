@@ -12,6 +12,8 @@ import userRoutes from "./routes/userRoutes.js";
 import ownerRoutes from "./routes/ownerRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import libraryRoutes from "./routes/libraryRoutes.js";
+
 
 // ===============================
 // 🔧 Configurations
@@ -55,6 +57,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/owner", ownerRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/library", libraryRoutes);
 
 // ===============================
 // ⚙️ MongoDB Connection
